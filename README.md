@@ -2,6 +2,9 @@
 
 *An Empirical Study of Apple Intelligence Eligibility, Regional Restrictions, Feature Availability, and Runtime Behavior Using iOS sysdiagnose*
 
+<div align="center"><a href="https://github.com/Rainbow-SPY/AppleIntelligencePaperResearch/blob/main/PaperReserach_zh-CN.md">简体中文</a>   
+  |  <a href="https://github.com/Rainbow-SPY/AppleIntelligencePaperResearch/blob/main/PaperReserach_en-US.md">English</a></div>
+
 ## 研究环境与适用范围
 
 本文以研究者本人在中国大陆购买的 **iPhone 15 Pro Max**[^1] 为主要实验设备，采用真实设备操作、系统配置对照、sysdiagnose 原始数据解析及 Unified Logs 事件分析的方法开展研究。
