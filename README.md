@@ -2,8 +2,8 @@
 
 *An Empirical Study of Apple Intelligence Eligibility, Regional Restrictions, Feature Availability, and Runtime Behavior Using iOS sysdiagnose*
 
-<div align="center"><a href="https://github.com/Rainbow-SPY/AppleIntelligencePaperResearch/blob/main/PaperResearch_zh-CN.md">简体中文</a>   
-  |  <a href="https://github.com/Rainbow-SPY/AppleIntelligencePaperResearch/blob/main/PaperResearch_en-US.md">English</a></div>
+<div align="center"><a href="https://github.com/Rainbow-SPY/AppleIntelligenceResearchReport/blob/main/ResearchReport_zh-CN.md">简体中文</a>
+  |  <a href="https://github.com/Rainbow-SPY/AppleIntelligenceResearchReport/blob/main/ResearchReport_en-US.md">English</a></div>
 
 ## 研究环境与适用范围
 
