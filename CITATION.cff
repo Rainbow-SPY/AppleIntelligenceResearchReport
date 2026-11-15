@@ -1,66 +1,18 @@
-cff-version: 1.2.0
+cff-version: "1.2.0"
 
-message: >-
-  If you use, reference, or build upon this research,
-  please cite the research report using the preferred citation below.
+message: "If you use or reference this research, please cite the report below."
 
 title: "Apple Intelligence Research Report"
 
 authors:
   - name: "Rainbow-SPY"
 
-abstract: >-
-  An empirical investigation of Apple Intelligence eligibility,
-  regional restrictions, feature availability, and runtime behavior
-  based on real-device testing and iOS sysdiagnose analysis.
-
-  The research examines OSEligibility policies, MobileGestalt,
-  countryd location estimates, Generative Experiences availability,
-  ModelCatalog, ModelManager, Private Cloud Compute (PCC),
-  and Apple Unified Logging.
-
-  Particular attention is given to the relationship between
-  device region, original sales identity, Apple Account country,
-  geographic location, cellular networks, Wi-Fi, IP geolocation,
-  and the execution of Apple Intelligence features.
-
-  The study includes experimental findings from an iPhone 15 Pro Max,
-  including Siri AI, image generation, Photos editing,
-  and runtime regional restrictions affecting PCC requests.
-
-keywords:
-  - Apple Intelligence
-  - iOS
-  - sysdiagnose
-  - OSEligibility
-  - MobileGestalt
-  - countryd
-  - Siri AI
-  - Private Cloud Compute
-  - PCC
-  - Regional Eligibility
-  - Regional Restrictions
-  - Generative AI
-  - Foundation Models
-  - ModelCatalog
-  - ModelManager
-  - Unified Logging
-  - iOS Diagnostics
-  - Reverse Engineering
-  - Empirical Research
-  - iPhone 15 Pro Max
-
 url: "https://github.com/Rainbow-SPY/AppleIntelligenceResearchReport"
-
-repository: "https://github.com/Rainbow-SPY/AppleIntelligenceResearchReport"
 
 preferred-citation:
   type: report
+  title: "An Empirical Study of Apple Intelligence Regional Eligibility, Feature Availability, and System Runtime Mechanisms Using iOS sysdiagnose"
   authors:
     - name: "Rainbow-SPY"
-  title: >-
-    An Empirical Study of Apple Intelligence Regional Eligibility,
-    Feature Availability, and System Runtime Mechanisms
-    Using iOS sysdiagnose
   year: 2026
   url: "https://github.com/Rainbow-SPY/AppleIntelligenceResearchReport"
