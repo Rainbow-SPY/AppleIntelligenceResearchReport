@@ -1,4 +1,4 @@
-cff-version: "1.2.0"
+cff-version: 1.2.0
 
 message: "If you use or reference this research, please cite the report below."
 
@@ -15,4 +15,3 @@ preferred-citation:
   authors:
     - name: "Rainbow-SPY"
   year: 2026
-  url: "https://github.com/Rainbow-SPY/AppleIntelligenceResearchReport"
