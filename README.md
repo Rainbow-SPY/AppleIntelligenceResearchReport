@@ -4,7 +4,7 @@
 
 ## 研究环境与适用范围
 
-本文以研究者本人持有的 **中国大陆销售版本 iPhone 15 Pro Max**[^1] 为主要实验设备，采用真实设备操作、系统配置对照、sysdiagnose 原始数据解析及 Unified Logs 事件分析的方法开展研究。
+本文以研究者本人在中国大陆购买的 **iPhone 15 Pro Max**[^1] 为主要实验设备，采用真实设备操作、系统配置对照、sysdiagnose 原始数据解析及 Unified Logs 事件分析的方法开展研究。
 
 **研究设备与软件环境如下：**
 
@@ -12,7 +12,7 @@
 |---|---|
 | 测试设备 | iPhone 15 Pro Max |
 | 硬件型号 | `iPhone16,2` |
-| 硬件区域型号 | `A3108`，中国大陆销售版本 |
+| 硬件区域型号 | `A3108`（对应中国大陆、香港及澳门的 iPhone 15 Pro Max；本机购于中国大陆） |
 | 操作系统 | iOS 27.3 Developer Beta 1 |
 | 系统 Build | `24C5037i` |
 | 配置研究工具 | GestaltX、MobileGestalt 数据导出工具 |
@@ -21,7 +21,7 @@
 | 系统语言环境 | 英语、繁体中文及 Siri 语言组合 |
 | 网络环境 | Wi-Fi、蜂窝网络、代理及不同网络出口 |
 | 诊断来源 | sysdiagnose、GestaltX plist、模型目录、运行日志、异常报告 |
-| 本地分析平台 | Windows、C#、.NET 10、Newtonsoft.Json |
+| 本地分析环境 | Windows；离线解析 plist、JSON、文本及 Unified Logs |
 | 研究时间范围 | 2026 年 11 月 |
 | 公开资料核对日期 | 2026 年 11 月 16 日 |
 
@@ -101,6 +101,23 @@ Apple Intelligence 是苹果在操作系统中集成的生成式人工智能能�
 | **总计** | **1,136** | 核心诊断资料 |
 
 该归档包含 **66 个 `.tracev3` 文件**和 **1 个 `.timesync` 文件**。日志归档与其他系统状态快照共同构成此次研究的主要证据来源。
+
+### 2.1.1 结构化数据的统计口径
+
+以 sysdiagnose 根目录 `./` 为路径基准，文件总数按非目录条目计算；资格域、功能用例与模型目录则从解析后的原始对象和完整资源标识中统计。
+
+**表 1-1　主要结构化诊断对象统计**
+
+| 数据位置 | 统计对象 | 数量 |
+|---|---|---:|
+| `./logs/OSEligibility/state.plist` | `OS_ELIGIBILITY_STATE_DUMP_DOMAINS` 中的 Domain | 222 |
+| 同上 | `OS_ELIGIBILITY_STATE_DUMP_INPUTS` 中的 Input | 28 |
+| `./logs/GenerativeExperiences/GEAvailability.log` | `Assets ready` 字典中的不同 Use Case 键 | 63 |
+| 同上 | `Unified Reasons` 字典中的 Use Case 键 | 2 |
+| `./logs/ModelCatalog/model_catalog_dump.txt` | `Availability for ...:` 小节 | 347 |
+| 同上 | 按完整标识字符串去重的资源标识 | 347 |
+
+ModelCatalog 的资源标识可能包含功能、风格和配置后缀，例如 `VisualGeneration.GenerativePlayground:animation:animation`。统计时保留完整标识，因而每个配置变体均对应单独的资源条目。
 
 ### 2.2 目录组织
 
@@ -605,24 +622,45 @@ MOLYBDENUM
 
 ### 6.1 模型定义
 
-针对具体功能 \(F\)，建立以下诊断模型：
+本研究将 Apple Intelligence 功能诊断划分为**执行前条件检查（Pre-execution Validation）**和**运行时执行（Runtime Execution）**两个阶段。
+
+对于目标功能 \(f\) 与观测时刻 \(t\)，执行前综合条件定义为：
 
 $$
-F=H\land O\land E_F\land G_F\land A_F\land X_F
+P_f(t)=H_f(t)\land O_f(t)\land E_f(t)\land G_f(t)\land A_f(t)
 $$
-
-其中：
 
 | 符号 | 完整名称 | 研究含义 |
 |---|---|---|
-| `H` | Hardware Capability（硬件能力） | 目标设备的计算与硬件条件 |
-| `O` | Operating System Compatibility（操作系统兼容性） | 系统版本、语言、平台和功能配置 |
-| `E_F` | Feature Eligibility（功能资格） | OSEligibility 对应的策略答案 |
-| `G_F` | Generative Availability（生成式功能可用性） | 功能级授权、资源登记和策略限制 |
-| `A_F` | Assets and Model Readiness（资产与模型就绪） | 所需模型、依赖资产及推理提供者 |
-| `X_F` | Runtime Execution（运行时执行） | 请求实际提交、执行和返回结果 |
+| \(H_f\) | Hardware Capability（硬件能力） | 设备型号及目标功能的硬件条件 |
+| \(O_f\) | Operating System Compatibility（操作系统兼容性） | 系统版本、语言与配置 |
+| \(E_f\) | Feature Eligibility（功能资格） | OSEligibility 相关 Domain 的策略结果 |
+| \(G_f\) | Generative Availability（生成式功能可用性） | GEAvailability 的功能级状态 |
+| \(A_f\) | Asset and Model Readiness（资源与模型就绪） | 模型、依赖资产及推理提供者状态 |
+| \(P_f\) | Pre-execution Conditions（执行前综合条件） | 以上执行前条件的组合 |
 
-这是本文提出的诊断模型，主要用于建立系统化的证据分析顺序。
+运行时执行定义为：
+
+$$
+X_f(t)=\operatorname{Execute}(f,\operatorname{Context}_t)
+$$
+
+其中 \(\operatorname{Context}_t\) 包括实际请求发生时的网络、地区、账户、服务、请求参数及运行环境。执行结果 \(R_f(t)\) 按原始事件归类为：
+
+$$
+R_f(t)\in\{
+\mathrm{SUCCESS},\,
+\mathrm{REGIONAL\_BLOCK},\,
+\mathrm{ACCESS\_DENIED},\,
+\mathrm{QUOTA\_EXCEEDED},\,
+\mathrm{MODEL\_ERROR},\,
+\mathrm{NETWORK\_ERROR},\,
+\mathrm{RUNTIME\_ERROR},\,
+\mathrm{UNKNOWN}
+\}
+$$
+
+各层同时记录原始状态、时间戳、文件路径与功能标识，供跨文件证据关联。
 
 ### 6.2 Hardware：硬件条件
 
@@ -727,11 +765,32 @@ Updated since boot
 
 这两条记录展示了功能策略中**地区拒绝**和**伙伴配置状态**两种不同的判定结果。
 
+### 6.5.1 ChatGPT 扩展的阶段性状态
+
+2026 年 11 月 12 日采集的 GEAvailability 快照包含以下限制原因：
+
+```text
+availability.cached.useCaseBlockList
+  ["Unified Reasons"]
+  ["com.apple.Settings.AppleIntelligence.Partner.ChatGPT"]
+  [0].restricted._0
+  .useCaseDoesNotAllowCurrentIPCountryCode
+```
+
+该字段对应 ChatGPT Partner 的 IP 国家代码限制。后续实机操作中，研究者成功连接并绑定 ChatGPT 扩展。
+
+| 实验阶段 | 证据来源 | 观测结果 |
+|---|---|---|
+| 初始快照（2026-11-12） | `./logs/GenerativeExperiences/GEAvailability.log` | `useCaseDoesNotAllowCurrentIPCountryCode` |
+| 后续功能操作 | 实机 ChatGPT 扩展界面 | 连接、绑定成功 |
+
+关联分析所需数据包括两次操作的网络出口、Partner Use Case 状态、请求时间及对应服务日志。
+
 ### 6.6 Assets & Models：模型和资源
 
-模型资源检查涉及三个主要组件。实机的 `./logs/ModelCatalog/model_catalog_dump.txt` 包含 **347 个**以 `Availability for` 开始的可用性小节；具体资源标识和 `ready for` 条件均按原始文本分段提取。
+模型资源检查涉及三个主要组件。实机的 `./logs/ModelCatalog/model_catalog_dump.txt` 包含 **347 个**以 `Availability for` 开始的可用性小节，按完整标识去重后仍为 **347 个资源标识**。每个小节分别保存 `ready for` 条件及相关资源信息。
 
-**ModelCatalog** 记录某个 Use Case 或模型组是否能获得相应资源。
+**ModelCatalog** 记录某个 Use Case 或模型组是否能获得相应资源。在 `PhotosEdit.Outfill.1p` 等资源小节中，`ready for: ["(all,all)"]` 表示模型目录对所列配置报告就绪。
 
 **ModelManager** 记录模型资产、推理提供者、模型请求和会话。
 
@@ -779,34 +838,35 @@ PCC 的运行架构涉及经过验证的计算节点、请求加密、软件证�
 执行状态可以表示为：
 
 $$
-X_F=\operatorname{Result}(Request_F,Context_t)
+X_f(t)=\operatorname{Execute}(f,\operatorname{Context}_t)
 $$
 
 其中 `Context_t` 表示请求发生时的设备、网络和服务环境。
 
-**图 5　Apple Intelligence 六层判定模型**
+**图 5　Apple Intelligence 执行前条件与运行时执行链路**
 
 ```mermaid
 flowchart TD
-    A["目标功能 F"] --> H{"H: Hardware?"}
-    H -->|No| H0["UNSUPPORTED_HARDWARE"]
-    H -->|Yes| O{"O: Operating System?"}
+    A["目标功能 f"] --> H{"Hardware"}
+    H -->|不满足| H0["UNSUPPORTED_HARDWARE"]
+    H -->|满足| O{"Operating System"}
 
-    O -->|No| O0["UNSUPPORTED_OS"]
-    O -->|Yes| E{"E_F: Eligibility?"}
+    O -->|不满足| O0["UNSUPPORTED_OS"]
+    O -->|满足| E{"Eligibility"}
 
-    E -->|No| E0["NOT_ELIGIBLE"]
-    E -->|Yes| G{"G_F: Availability?"}
+    E -->|不满足| E0["NOT_ELIGIBLE"]
+    E -->|满足| G{"Generative Availability"}
 
-    G -->|No| G0["RESTRICTED"]
-    G -->|Yes| M{"A_F: Assets and Models?"}
+    G -->|受限| G0["RESTRICTED"]
+    G -->|允许| M{"Assets and Models"}
 
-    M -->|No| M0["MODEL_UNAVAILABLE"]
-    M -->|Yes| X{"X_F: Execution?"}
-
-    X -->|Success| S["SUCCESS"]
-    X -->|Failure| F1["ERROR"]
-    F1 --> F2["Region / Access / Quota / Runtime"]
+    M -->|未就绪| M0["MODEL_UNAVAILABLE"]
+    M -->|就绪| P["记录执行前综合条件 P_f(t)"]
+    P --> X["提交实际功能请求 X_f(t)"]
+    X --> R{"运行时返回结果"}
+    R -->|成功| S["SUCCESS"]
+    R -->|区域拒绝| RB["REGIONAL_BLOCK"]
+    R -->|其他错误| ER["记录授权、额度、网络或运行错误"]
 ```
 
 ---
@@ -1234,129 +1294,66 @@ flowchart TD
 
 ---
 
-## 10. Windows 自动化诊断系统设计
+## 10. Windows 环境下的离线诊断分析方法
 
-### 10.1 设计目标
+### 10.1 数据输入与格式识别
 
-研究者计划采用 C# 与 .NET 10，在 Windows 中实现完全本地化的 sysdiagnose 解析器，并将分析能力集成到 WinForms 界面。[^28]
-
-系统采用分层架构：
+本研究在 Windows 环境下对 sysdiagnose 的原始目录、归档和补充配置快照进行离线处理。首先递归枚举文件，再根据内容特征选择 plist、JSON、结构化文本或 Unified Logging 解码流程。
 
 ```text
-Diagnostic API
+sysdiagnose / 设备补充诊断
     ↓
-Archive Scanner
+文件与归档枚举
     ↓
-Format Detection
+内容格式识别
     ↓
-Plist / JSON / Text / Trace Decoder
+plist / NSKeyedArchiver / JSON / Text / tracev3
     ↓
-Raw Field Extraction
+字段和值的结构化提取
     ↓
-Eligibility / Region / Model / Log Analysis
+跨文件字段、功能和时间索引
     ↓
-Evidence Correlation
-    ↓
-Diagnostic Report
+综合诊断结果
 ```
 
-### 10.2 主要分析模块
+### 10.2 原始字段保留
 
-**表 18　程序组件**
+解析结果保存可追溯的字段索引：
 
-| 类 | 主要职责 |
+| 字段 | 用途 |
 |---|---|
-| `ArchiveWalker` | ZIP、TAR、目录及嵌套归档遍历 |
-| `DiagnosticScanner` | 文件识别与扫描调度 |
-| `ApplePlistReader` | plist 入口解析 |
-| `BinaryPlistReader` | Binary plist 对象表解析 |
-| `KeyedArchiveDecoder` | NSKeyedArchiver 对象还原 |
-| `FieldTreeWalker` | 字段路径递归展开 |
-| `EligibilityAnalyzer` | 资格域与 Policy 分析 |
-| `CountryEstimateAnalyzer` | 国家估计对象提取 |
-| `RegionAnalyzer` | 地区及网络地区信号 |
-| `GenerativeAvailabilityAnalyzer` | GEAvailability 分析 |
-| `ModelCatalogAnalyzer` | 模型目录及管理信息 |
-| `NetworkEvidenceAnalyzer` | 网络证据提取 |
-| `LogArchiveInspector` | 日志归档结构识别 |
-| `LogEvidenceAnalyzer` | 日志错误与功能事件识别 |
-| `FeatureCorrelator` | 多源功能证据关联 |
-| `ReportExporter` | JSON、JSONL、Markdown 输出 |
-| `DiagnosticApi` | 对外统一接口 |
+| `SourceFile` | 相对于诊断根目录的文件路径 |
+| `Format` | 原始序列化格式 |
+| `FieldPath` | 完整的对象访问路径 |
+| `ValueType` | 字段类型 |
+| `RawValue` | 原始表示形式 |
+| `DecodedValue` | 解析后的值 |
+| `TimestampUTC` | 与字段或事件关联的时间 |
+| `ByteOffset` | 二进制对象在原始数据中的偏移（适用时） |
 
-研究使用的源代码原型按 7 组组织，合计 28 个 `.cs`，所有 JSON 处理统一使用 `Newtonsoft.Json`。程序集与输出路径在用户自行创建的 WinForms 项目中配置。[^29]
-
-### 10.3 全量扫描
-
-统一扫描入口为：
-
-```csharp
-DiagnosticReport report =
-    await DiagnosticApi.AnalyzeManyAsync(
-        inputs,
-        outputDirectory,
-        options,
-        progress,
-        cancellationToken);
-```
-
-该入口负责调用已注册的扫描与分析组件。
-
-主要输出文件：
-
-| 文件 | 内容 |
-|---|---|
-| `report.json` | 总体分析结果 |
-| `report.md` | 可阅读的诊断报告 |
-| `plist_fields.jsonl` | 已提取的 plist / JSON 字段 |
-| `eligibility_domains.jsonl` | 资格域 |
-| `ge_usecases.jsonl` | 功能用例 |
-| `regions.jsonl` | 国家地区证据 |
-| `models.jsonl` | 模型资源 |
-| `evidence.jsonl` | 功能状态及错误证据 |
-| `path_hits.jsonl` | 命中的文件路径规则 |
-| `warnings.jsonl` | 解析异常及警告 |
-
-### 10.4 字段索引与自定义扩展
-
-对于任意原始字段，建议保存：[^29]
+样例：
 
 ```json
 {
-  "SourceFile": "logs/OSEligibility/state.plist",
+  "SourceFile": "./logs/OSEligibility/state.plist",
   "Format": "XML_PLIST",
-  "FieldPath": "OS_ELIGIBILITY_STATE_DUMP_INPUTS.OS_ELIGIBILITY_INPUT_COUNTRY_LOCATION",
-  "Key": "OS_ELIGIBILITY_INPUT_COUNTRY_LOCATION",
+  "FieldPath": "OS_ELIGIBILITY_STATE_DUMP_LAST_ANSWERS.GREYMATTER.os_eligibility_answer_t",
   "ValueType": "string",
-  "RawValue": "...",
-  "DecodedValue": "...",
+  "DecodedValue": "ELIGIBLE",
   "TimestampUTC": null,
-  "ByteOffset": null,
-  "Parser": "EligibilityInputParser"
+  "ByteOffset": null
 }
 ```
 
-字段映射和分析规则分别维护。
+### 10.3 Unified Logs 数据还原
 
-例如：
+对于 `.tracev3`，关联其 Catalog、Firehose 事件、UUIDText、共享缓存和 timesync 信息，恢复时间戳及日志消息。Windows 环境可使用跨平台 Unified Logs 解码工具将事件转换为 JSONL 或 CSV，然后根据进程、子系统、时间及错误码建立检索索引。[^25][^26][^27]
 
-```text
-原始字段
-    ↓
-FieldPath 索引
-    ↓
-字段解码与规范化
-    ↓
-Domain / Use Case 关联
-    ↓
-诊断状态
-    ↓
-WinForms 显示
-```
+### 10.4 综合诊断数据
 
-这样可以根据新系统出现的字段扩展分析规则，并保留原始资料以供重新分析。
+综合分析按照设备身份、地区估计、系统资格、功能可用性、模型资源、运行事件及异常报告分类。
 
----
+每项功能记录其关联的 Domain、Use Case、资源标识、运行请求及原始文件位置。通过事件时间与资源快照时间关联，形成可重复检索的证据链。
 
 ## 11. 多源证据关联与异常定位
 
@@ -1431,6 +1428,61 @@ flowchart TD
 从现有证据出发，照片 Extend 和 Reframe 的主要故障已被定位到运行时区域限制。下一阶段研究的技术目标是识别该限制在 PCC 处理链路中使用的具体输入、策略或服务响应。
 
 ---
+
+### 11.4 实验时间线与跨文件关联
+
+#### 11.4.1 核心 sysdiagnose 文件时间
+
+下表时间取自核心诊断归档中的文件时间元数据，按归档采集环境的 UTC+08:00 展示；实际请求时间由 Unified Logs 单独提供。
+
+| 时间（UTC+08:00） | 对象 | 可分析信息 |
+|---|---|---|
+| 2026-11-11 23:58:08 | `./logs/Country/countryCodeCache.plist` | 国家估计与缓存 |
+| 2026-11-12 00:07:36 | `./logs/OSEligibility/state.plist` | 资格域、Policy、输入与结果 |
+| 2026-11-12 00:07:36 | `./logs/GenerativeExperiences/GEAvailability.log` | 功能级限制与授权状态 |
+| 2026-11-12 00:07:36 | `./logs/ModelManager/model_manager_dump.json` | 模型及推理提供者快照 |
+| 2026-11-12 00:08:00 | `./logs/ModelCatalog/model_catalog_dump.txt` | 资源目录及就绪条件 |
+| 2026-11-12 00:08:30 | `./system_logs.logarchive/Info.plist` | 系统日志归档元数据 |
+
+#### 11.4.2 Photos PCC 专项整理
+
+2026 年 11 月 13 日 01:21:51（UTC+08:00），研究者对前述 sysdiagnose 开展 Photos PCC 专项整理，并保留了收集清单。
+
+| 收集项 | 记录结果 |
+|---|---:|
+| 复制来源文件 | 1,046 |
+| 复制数据量 | 564,635,865 Bytes |
+| 内存异常记录回溯范围 | 72 小时 |
+| 完整 `system_logs.logarchive` | 已包含 |
+
+该次整理用于集中分析照片编辑相关资格、模型资源和 Unified Logs 请求。
+
+#### 11.4.3 功能事件关联
+
+针对功能 \(f\) 与请求时间 \(t\)，建立以下证据集合：
+
+$$
+\mathcal E(f,t)=
+\{
+Eligibility_t,\,
+CountryEstimate_t,\,
+Availability_t,\,
+ModelState_t,\,
+Execution_{f,t}
+\}
+$$
+
+| 证据源 | 时间及关联字段 |
+|---|---|
+| OSEligibility | 快照时间、Domain、Policy 和 Answer |
+| countryd | `RDEstimate.Timestamp`、国家来源及综合估计 |
+| GEAvailability | 快照时间、Use Case、`Unified Reasons` |
+| ModelCatalog | 资源标识、`ready for` 与快照时间 |
+| ModelManager | 推理提供者、Request、Session |
+| Unified Logs | 事件时间、Process、RequestType、ErrorCode |
+
+主要关联对象为 Photos Extend、Spatial Reframe 以及 ChatGPT Partner 的阶段性状态记录。
+
 
 ## 12. 研究讨论
 
@@ -1524,7 +1576,7 @@ Unified Logs 为研究者提供了直接定位执行错误的能力。[^13]
 
 | 层级 | 实测字段或来源 | 记录值 |
 |---|---|---|
-| 原始硬件 | iPhone 15 Pro Max、`A3108` | 中国大陆销售机型 |
+| 原始硬件 | iPhone 15 Pro Max、`A3108` | 研究者购于中国大陆；硬件型号在区域配置实验中保持不变 |
 | 设备区域 | MobileGestalt `RegionCode` | `ZA` |
 | 设备销售区域字段 | MobileGestalt `SalesRegion` | `ZA/A` |
 | 账户地区 | `COUNTRY_BILLING` | `US` |
@@ -1702,8 +1754,8 @@ flowchart TD
 4. GEAvailability 对不同 Apple Intelligence Use Case 保存资源状态与限制原因。
 5. ModelCatalog、ModelManager 和 UnifiedAsset 共同提供模型资源、推理组件及部署信息。
 6. 通过解析 Unified Logs，可将高级照片编辑异常定位到具体请求及错误代码。
-7. 六层功能判定模型可以将硬件、系统、资格、授权、资源和执行结果整合为可追溯的诊断证据链。
-8. Windows 本地解析器可通过结构化字段提取与跨平台 Unified Logs 解码实现统一诊断分析。
+7. 执行前条件与运行时执行相结合的分阶段判定模型，将硬件、系统、资格、功能授权、模型资源和实际结果纳入同一证据链。
+8. Windows 环境可通过结构化字段提取与跨平台 Unified Logs 解码，建立统一的本地检索与证据关联方法。
 
 本研究为进一步分析 Apple Intelligence 区域资格机制、构建自动化诊断工具及研究 iOS 内部服务行为提供了可复用的方法基础。
 
@@ -1791,7 +1843,7 @@ Apple Intelligence 功能可用性与异常归因
 | Jetsam 内存压力 | `./cr/JetsamEvent-*.ips` | 诊断 JSON | `memoryStatus`、`processes[]` |
 | 进程内存异常 | `./cr/me/*.lite_diag` | Binary plist | `MemoryResourceExceptionMetaData` 下 `MRE_*` |
 | 外部网络接口信息 | 补充采集的 `./logs/Networking/` | 文本与 plist | `ifconfig`、路由、`NetworkInterfaces.plist`、网络偏好 |
-| 跨文件关联结果 | Windows 分析器输出目录 | JSON / JSONL | `evidence.jsonl`、`regions.jsonl`、`report.json` |
+| 跨文件关联结果 | 本地诊断分析结果 | JSON / JSONL | 统一字段索引、功能状态与错误事件记录 |
 
 ---
 
@@ -1824,5 +1876,3 @@ Apple Intelligence 功能可用性与异常归因
 [^25]: [Apple Unified Logging and Activity Tracing formats — libyal/dtformats](https://github.com/libyal/dtformats/blob/main/documentation/Apple%20Unified%20Logging%20and%20Activity%20Tracing%20formats.asciidoc)
 [^26]: [macos-UnifiedLogs — Mandiant](https://github.com/mandiant/macos-UnifiedLogs)
 [^27]: [macos-UnifiedLogs CHANGELOG — Mandiant](https://github.com/mandiant/macos-UnifiedLogs/blob/main/CHANGELOG.md)
-[^28]: [Windows Forms Overview — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/desktop/winforms/overview/)
-[^29]: [Serializing and Deserializing JSON — Json.NET Documentation](https://www.newtonsoft.com/json/help/html/SerializingJSON.htm)
